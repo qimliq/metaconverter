@@ -5,5 +5,6 @@ MetaStock to Xml/Csv Converter
 - To build the code use a GCC compiler for Windows. 
 - MingW is used for compiling the code.
 
-> mingw32-gcc -c metaconverter.c
-> mingw32-gcc metaconverter.o -c metaconverter.exe
+mingw32-gcc -c metaconverter.c
+
+mingw32-gcc metaconverter.o -c metaconverter.exe
