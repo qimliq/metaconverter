@@ -7,8 +7,8 @@
 #include <ctype.h>
 
 #define METADIR ""
-#define METAXMLDIR "data"
-#define METACSVDIR "csv"
+#define METAXMLDIR "xmls"
+#define METACSVDIR "csvs"
 #define CONVERT_START_DATE 105
 
 #define VERSION_NUMBER  0x3636
@@ -376,14 +376,14 @@ int process_fdata( const char* symbol, FILE* fdatafile )
 			}
 
 			fprintf(xmlfile, "<date id=\"%d\">", (int)date);
-			fprintf(xmlfile, "<open>%.2f</open>", open);
-			fprintf(xmlfile, "<close>%.2f</close>", close);
-			fprintf(xmlfile, "<high>%.2f</high>", high);
-			fprintf(xmlfile, "<low>%.2f</low>", low);
+			fprintf(xmlfile, "<open>%.4f</open>", open);
+			fprintf(xmlfile, "<close>%.4f</close>", close);
+			fprintf(xmlfile, "<high>%.4f</high>", high);
+			fprintf(xmlfile, "<low>%.4f</low>", low);
 			fprintf(xmlfile, "<amount>%ld</amount>", ((int)(amount*close)));
 			fprintf(xmlfile, "</date>\n");
 
-			fprintf(csvfile,"%d,%.2f,%.2f,%.2f,%.2f,%.2f\n",(int)date,open,low,high,close,amount);
+			fprintf(csvfile,"%d,%.4f,%.4f,%.4f,%.4f,%.2f\n",(int)date,open,low,high,close,amount);
 
 			arridx++;
 		}
