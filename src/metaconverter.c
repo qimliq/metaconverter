@@ -148,12 +148,9 @@ int process_emaster( void )
 				&& (Buffer[1] == 0x36)
 				)
 			{
-
 				unsigned char temp = Buffer[EMASTER_FIRST_DATE + 3];
-				unsigned int dene2 = 0x49852518;
-				//int date, year, month, day;
 				float out2 = 0.0;
-				float out3 = 0.0, out4 = 0.0;
+				float out3 = 0.0;
 
 				char datfilename[256];
 				char symbol[15];
@@ -252,7 +249,6 @@ int process_master( void )
 
 int process_xmaster( void )
 {
-	int end = 0;
 	unsigned int NoRead;
 	unsigned char Buffer[150];
 
@@ -275,8 +271,6 @@ int process_xmaster( void )
 			&& (Buffer[0] == 0x01)
 			)
 		{
-			unsigned char temp = Buffer[EMASTER_FIRST_DATE + 3];
-
 			unsigned int out3, out4;
 
 			char datfilename[256];
@@ -315,7 +309,6 @@ int process_xmaster( void )
 
 int process_fdata( const char* symbol, FILE* fdatafile )
 {
-	int end = 0;
 	unsigned int NoRead;
 	unsigned char Buffer[24];
 	char filename[256];
@@ -362,6 +355,7 @@ int process_fdata( const char* symbol, FILE* fdatafile )
 		/*check the version number*/
 		if (NoRead == 24)
 		{
+			long int am = ((long int)(amount*close));
 
 			_fmsbintoieee((float*)&Buffer[0], &date);
 			_fmsbintoieee((float*)&Buffer[4], &open);
@@ -380,7 +374,7 @@ int process_fdata( const char* symbol, FILE* fdatafile )
 			fprintf(xmlfile, "<close>%.4f</close>", close);
 			fprintf(xmlfile, "<high>%.4f</high>", high);
 			fprintf(xmlfile, "<low>%.4f</low>", low);
-			fprintf(xmlfile, "<amount>%ld</amount>", ((int)(amount*close)));
+			fprintf(xmlfile, "<amount>%ld</amount>", am);
 			fprintf(xmlfile, "</date>\n");
 
 			fprintf(csvfile,"%d,%.4f,%.4f,%.4f,%.4f,%.2f\n",(int)date,open,low,high,close,amount);
