@@ -15,4 +15,4 @@ mingw32-gcc metaconverter.o -c metaconverter.exe
 
 gcc -c metaconverter.c
 
-gcc metaconverter.o -c metaconverter
+gcc metaconverter.o -o metaconverter
