@@ -110,334 +110,323 @@ int process_fdata(const char* symbol, FILE* fdatafile);
 int main(int argc, char *argv[])
 //int _tmain(int argc, _TCHAR* argv[])
 {
-
-	process_master();
+    process_master();
 
     //process_emaster();
 
-	process_xmaster();
+    process_xmaster();
 
-	return EXIT_SUCCESS;
+    return EXIT_SUCCESS;
 }
 
 int process_emaster( void )
 {
-	int end = 0;
-	unsigned int NoRead;
-	unsigned char Buffer[192];
+    int end = 0;
+    unsigned int num_read;
+    unsigned char buffer[192];
 
-	char outstr[100];
+    char outstr[100];
 
-	sprintf(outstr, "%sEMASTER", METADIR);
+    sprintf(outstr, "%sEMASTER", METADIR);
 
-	FILE* emasterfile = fopen(outstr, "rb");
+    FILE* emasterfile = fopen(outstr, "rb");
 
-	if (!emasterfile)
-	{
-		return -1;
-	}
+    if (!emasterfile)
+    {
+        return -1;
+    }
 
-	while (!end)
-	{
-		if (!feof(emasterfile))
-		{
-			NoRead = fread(Buffer, 1, 192, emasterfile);
-			/*check the version number*/
-			if ((NoRead == 192)
-				&& (Buffer[0] == 0x36)
-				&& (Buffer[1] == 0x36)
-				)
-			{
-				unsigned char temp = Buffer[EMASTER_FIRST_DATE + 3];
-				float out2 = 0.0;
-				float out3 = 0.0;
+    while (!end)
+    {
+        if (!feof(emasterfile))
+        {
+            num_read = fread(buffer, 1, 192, emasterfile);
+            /*check the version number*/
+            if ((num_read == 192)
+                && (buffer[0] == 0x36)
+                && (buffer[1] == 0x36)
+                )
+            {
+                unsigned char temp = buffer[EMASTER_FIRST_DATE + 3];
+                float out2 = 0.0;
+                float out3 = 0.0;
 
-				char datfilename[256];
-				char symbol[15];
-				FILE* datfile;
-				Buffer[EMASTER_FIRST_DATE + 3] = (temp << 4) + (temp >> 4);
-				temp = Buffer[EMASTER_LAST_DATE + 3];
-				Buffer[EMASTER_LAST_DATE + 3] = (temp << 4) + (temp >> 4);
-				_fmsbintoieee((float*)&Buffer[EMASTER_FIRST_DATE], &out2);
-				_fmsbintoieee((float*)&Buffer[EMASTER_LAST_DATE], &out3);
-				printf("F%d.DAT: %s, %s, %f, %f\n", Buffer[EMASTER_FX],
-					&Buffer[EMASTER_SYMBOL],
-					&Buffer[EMASTER_NAME],
-					out2, out3);
-				sprintf(datfilename, "%sF%d.DAT", METADIR, Buffer[EMASTER_FX]);
-				sprintf(symbol, "%s", &Buffer[EMASTER_SYMBOL]);
-				datfile = fopen(datfilename, "rb");
-				if (datfile)
-				{
-					process_fdata(symbol, datfile);
-					fclose(datfile);
-				}
-			}
-		}
-		else
-		{
-			end++;
-		}
-	}
-	fclose(emasterfile);
-	return 0;
+                char datfilename[256];
+                char symbol[15];
+                FILE* datfile;
+                buffer[EMASTER_FIRST_DATE + 3] = (temp << 4) + (temp >> 4);
+                temp = buffer[EMASTER_LAST_DATE + 3];
+                buffer[EMASTER_LAST_DATE + 3] = (temp << 4) + (temp >> 4);
+                _fmsbintoieee((float*)&buffer[EMASTER_FIRST_DATE], &out2);
+                _fmsbintoieee((float*)&buffer[EMASTER_LAST_DATE], &out3);
+                printf("F%d.DAT: %s, %s, %f, %f\n", buffer[EMASTER_FX],
+                    &buffer[EMASTER_SYMBOL],
+                    &buffer[EMASTER_NAME],
+                    out2, out3);
+                sprintf(datfilename, "%sF%d.DAT", METADIR, buffer[EMASTER_FX]);
+                sprintf(symbol, "%s", &buffer[EMASTER_SYMBOL]);
+                datfile = fopen(datfilename, "rb");
+                if (datfile)
+                {
+                    process_fdata(symbol, datfile);
+                    fclose(datfile);
+                }
+            }
+        }
+        else
+        {
+            end++;
+        }
+    }
+    fclose(emasterfile);
+    return 0;
 }
 
 int process_master( void )
 {
-	int end = 0;
-	unsigned int NoRead;
-	unsigned char Buffer[53];
+    int end = 0;
+    unsigned int num_read;
+    unsigned char buffer[53];
 
-	char outstr[100];
+    char outstr[100];
 
-	sprintf(outstr, "%sMASTER", METADIR);
+    sprintf(outstr, "%sMASTER", METADIR);
 
-	FILE* masterfile = fopen(outstr, "rb");
+    FILE* masterfile = fopen(outstr, "rb");
 
-	if (!masterfile)
-	{
-		return -1;
-	}
+    if (!masterfile)
+    {
+        return -1;
+    }
 
-	while (!end)
-	{
-		if (!feof(masterfile))
-		{
-			NoRead = fread(Buffer, 1, 53, masterfile);
+    while (!end)
+    {
+        if (!feof(masterfile))
+        {
+            num_read = fread(buffer, 1, 53, masterfile);
 
-			if ((NoRead == 53)
-				)
-			{
-				//float out2;
-				//float out3, out4;
+            if (num_read == 53)
+            {
+                char datfilename[256];
+                char symbol[256];
+                FILE* datfile;
+                printf("F%d.DAT: %s, %s\n", buffer[MASTER_FX],
+                    &buffer[MASTER_SYMBOL],
+                    &buffer[MASTER_NAME]);
 
-				char datfilename[256];
-				char symbol[256];
-				FILE* datfile;
-				printf("F%d.DAT: %s, %s\n", Buffer[MASTER_FX],
-					&Buffer[MASTER_SYMBOL],
-					&Buffer[MASTER_NAME]);
-
-				sprintf(datfilename, "%sF%d.DAT", METADIR, Buffer[MASTER_FX]);
-				sprintf(symbol, "%s", &Buffer[MASTER_SYMBOL]);
-				if (symbol[4] == 0x20)
-				{
-					symbol[4] = '\0';
-				}
-				if (symbol[5] == 0x20)
-				{
-					symbol[5] = '\0';
-				}
-				symbol[6] = '\0';
-				datfile = fopen(datfilename, "rb");
-				if (datfile)
-				{
-					process_fdata( symbol, datfile );
-					fclose(datfile);
-				}
-			}
-		}
-		else
-		{
-			end++;
-		}
-	}
-	fclose(masterfile);
-	return 0;
+                sprintf(datfilename, "%sF%d.DAT", METADIR, buffer[MASTER_FX]);
+                sprintf(symbol, "%s", &buffer[MASTER_SYMBOL]);
+                if (symbol[4] == 0x20)
+                {
+                    symbol[4] = '\0';
+                }
+                if (symbol[5] == 0x20)
+                {
+                    symbol[5] = '\0';
+                }
+                symbol[6] = '\0';
+                datfile = fopen(datfilename, "rb");
+                if (datfile)
+                {
+                    process_fdata( symbol, datfile );
+                    fclose(datfile);
+                }
+            }
+        }
+        else
+        {
+            end++;
+        }
+    }
+    fclose(masterfile);
+    return 0;
 }
 
 int process_xmaster( void )
 {
-	unsigned int NoRead;
-	unsigned char Buffer[150];
+    unsigned int num_read;
+    unsigned char buffer[150];
 
-	char outstr[100];
+    char outstr[100];
 
-	sprintf(outstr, "%sXMASTER", METADIR);
+    sprintf(outstr, "%sXMASTER", METADIR);
 
-	FILE* xmasterfile = fopen(outstr, "rb");
+    FILE* xmasterfile = fopen(outstr, "rb");
 
-	if (!xmasterfile)
-	{
-		return -1;
-	}
+    if (!xmasterfile)
+    {
+        return -1;
+    }
 
-	while (!feof(xmasterfile))
-	{
-		NoRead = fread(Buffer, 1, 150, xmasterfile);
-		/*check the version number*/
-		if ((NoRead == 150)
-			&& (Buffer[0] == 0x01)
-			)
-		{
-			unsigned int out3, out4;
+    while (!feof(xmasterfile))
+    {
+        num_read = fread(buffer, 1, 150, xmasterfile);
+        /*check the version number*/
+        if ((num_read == 150)
+            && (buffer[0] == 0x01)
+            )
+        {
+            unsigned int out3, out4;
 
-			char datfilename[256];
-			char symbol[15];
-			FILE* datfile;
+            char datfilename[256];
+            char symbol[15];
+            FILE* datfile;
 
-			out3 = (Buffer[XMASTER_START_DATE_1] << 24) + \
-					(Buffer[XMASTER_START_DATE_1 + 1] << 16) + \
-					(Buffer[XMASTER_START_DATE_1 + 2] << 8) + \
-					Buffer[XMASTER_START_DATE_1 + 3];
+            out3 = (buffer[XMASTER_START_DATE_1] << 24) + \
+                    (buffer[XMASTER_START_DATE_1 + 1] << 16) + \
+                    (buffer[XMASTER_START_DATE_1 + 2] << 8) + \
+                    buffer[XMASTER_START_DATE_1 + 3];
 
-			out4 = (Buffer[XMASTER_END_DATE_2] << 24) + \
-					(Buffer[XMASTER_END_DATE_2 + 1] << 16) + \
-					(Buffer[XMASTER_END_DATE_2 + 2] << 8) + \
-					Buffer[XMASTER_END_DATE_2 + 3];
+            out4 = (buffer[XMASTER_END_DATE_2] << 24) + \
+                    (buffer[XMASTER_END_DATE_2 + 1] << 16) + \
+                    (buffer[XMASTER_END_DATE_2 + 2] << 8) + \
+                    buffer[XMASTER_END_DATE_2 + 3];
 
-			printf("F%d.MWD: %s, %s, %d, %d\n", (Buffer[XMASTER_FN + 1] << 8) + Buffer[XMASTER_FN],
-				&Buffer[XMASTER_SYMBOL],
-				&Buffer[XMASTER_NAME],
-				out3, out4);
+            printf("F%d.MWD: %s, %s, %d, %d\n", (buffer[XMASTER_FN + 1] << 8) + buffer[XMASTER_FN],
+                &buffer[XMASTER_SYMBOL],
+                &buffer[XMASTER_NAME],
+                out3, out4);
 
-			sprintf(datfilename, "%sF%d.MWD", METADIR, (Buffer[XMASTER_FN + 1] << 8) + Buffer[XMASTER_FN]);
-			sprintf(symbol, "%s", &Buffer[XMASTER_SYMBOL]);
-			datfile = fopen(datfilename, "rb");
-				
-			if (datfile)
-			{
-				process_fdata( symbol, datfile );
-				fclose(datfile);
-			}
-		}		
-	}
-	fclose(xmasterfile);
-	return 0;
+            sprintf(datfilename, "%sF%d.MWD", METADIR, (buffer[XMASTER_FN + 1] << 8) + buffer[XMASTER_FN]);
+            sprintf(symbol, "%s", &buffer[XMASTER_SYMBOL]);
+            datfile = fopen(datfilename, "rb");
+
+            if (datfile)
+            {
+                process_fdata( symbol, datfile );
+                fclose(datfile);
+            }
+        }		
+    }
+    fclose(xmasterfile);
+    return 0;
 }
 
 int process_fdata( const char* symbol, FILE* fdatafile )
 {
-	unsigned int NoRead;
-	unsigned char Buffer[24];
-	char filename[256];
-	int i;
+    unsigned int num_read;
+    unsigned char buffer[24];
+    char filename[256];
 
-	int arridx = 0;
-	float date, open, close, low, high, amount;
+    int arridx = 0;
+    float date, open, close, low, high, amount;
 
-	FILE* xmlfile;
-	FILE* csvfile;
+    FILE* xmlfile;
+    FILE* csvfile;
 
-	NoRead = fread(Buffer, 1, 24, fdatafile);
-	memset(filename, 0, 256);
-	sprintf(filename, "%s/%s.xml", METAXMLDIR, symbol);
-	for (i = 0; filename[i]; i++)
-	{
-		filename[i] = tolower(filename[i]);
-	}
+    num_read = fread(buffer, 1, 24, fdatafile);
+    
+    memset(filename, 0, 256);
+    sprintf(filename, "%s/%s.xml", METAXMLDIR, symbol);
+    xmlfile = fopen(filename, "w+");
+    if (!xmlfile)
+    {
+        return -1;
+    }
 
-	xmlfile = fopen(filename, "w+");
-	if (!xmlfile)
-	{
-		return -1;
-	}
+    memset(filename, 0, 256);
+    sprintf(filename, "%s/%s.csv", METACSVDIR, symbol);
+    csvfile = fopen(filename, "w+");
+    if (!csvfile)
+    {
+        fclose(xmlfile);
+        return -1;
+    }
+    
+    
+    fprintf(xmlfile, "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n");
+    fprintf(xmlfile, "<stock name=\"%s\">\n", symbol);
 
-	sprintf(filename, "%s/%s.csv", METACSVDIR, symbol);
-	for (i = 0; filename[i]; i++)
-	{
-		filename[i] = tolower(filename[i]);
-	}
+    fprintf(csvfile, "Date,Open,Low,High,Close,Volume\n");
+    while (!feof(fdatafile))
+    {
+        num_read = fread(buffer, 1, 24, fdatafile);
+        /*check the version number*/
+        if (num_read == 24)
+        {
+            long int am = ((long int)(amount*close));
 
-	csvfile = fopen(filename, "w+");
-	if (!csvfile)
-	{
-		return -1;
-	}
-	fprintf(xmlfile, "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n");
-	fprintf(xmlfile, "<stock name=\"%s\">\n", symbol);
-	
-	fprintf(csvfile, "Date,Open,Low,High,Close,Volume\n");
-	while (!feof(fdatafile))
-	{
-		NoRead = fread(Buffer, 1, 24, fdatafile);
-		/*check the version number*/
-		if (NoRead == 24)
-		{
-			long int am = ((long int)(amount*close));
+            _fmsbintoieee((float*)&buffer[0], &date);
+            _fmsbintoieee((float*)&buffer[4], &open);
+            _fmsbintoieee((float*)&buffer[8], &high);
+            _fmsbintoieee((float*)&buffer[12], &low);
+            _fmsbintoieee((float*)&buffer[16], &close);
+            _fmsbintoieee((float*)&buffer[20], &amount);
 
-			_fmsbintoieee((float*)&Buffer[0], &date);
-			_fmsbintoieee((float*)&Buffer[4], &open);
-			_fmsbintoieee((float*)&Buffer[8], &high);
-			_fmsbintoieee((float*)&Buffer[12], &low);
-			_fmsbintoieee((float*)&Buffer[16], &close);
-			_fmsbintoieee((float*)&Buffer[20], &amount);
+            if ((((int)date) / 10000)<CONVERT_START_DATE)
+            {
+                continue;
+            }
 
-			if ((((int)date) / 10000)<CONVERT_START_DATE)
-			{
-				continue;
-			}
+            fprintf(xmlfile, "<date id=\"%d\">", (int)date);
+            fprintf(xmlfile, "<open>%.4f</open>", open);
+            fprintf(xmlfile, "<close>%.4f</close>", close);
+            fprintf(xmlfile, "<high>%.4f</high>", high);
+            fprintf(xmlfile, "<low>%.4f</low>", low);
+            fprintf(xmlfile, "<amount>%ld</amount>", am);
+            fprintf(xmlfile, "</date>\n");
 
-			fprintf(xmlfile, "<date id=\"%d\">", (int)date);
-			fprintf(xmlfile, "<open>%.4f</open>", open);
-			fprintf(xmlfile, "<close>%.4f</close>", close);
-			fprintf(xmlfile, "<high>%.4f</high>", high);
-			fprintf(xmlfile, "<low>%.4f</low>", low);
-			fprintf(xmlfile, "<amount>%ld</amount>", am);
-			fprintf(xmlfile, "</date>\n");
+            fprintf(csvfile,"%d,%.4f,%.4f,%.4f,%.4f,%.2f\n",(int)date,open,low,high,close,amount);
 
-			fprintf(csvfile,"%d,%.4f,%.4f,%.4f,%.4f,%.2f\n",(int)date,open,low,high,close,amount);
+            arridx++;
+        }
+    }
 
-			arridx++;
-		}
-	}
-
-	fprintf(xmlfile, "</stock>\n");
-	fclose(xmlfile);
-	fclose(csvfile);
-	return 0;
+    fprintf(xmlfile, "</stock>\n");
+    fclose(xmlfile);
+    fclose(csvfile);
+    return 0;
 }
 
 int _fmsbintoieee(float *src4, float *dest4)
 {
-	unsigned char *msbin = (unsigned char *)src4;
-	unsigned char *ieee = (unsigned char *)dest4;
-	unsigned char sign = 0x00;
-	unsigned char ieee_exp = 0x00;
-	int i;
+    unsigned char *msbin = (unsigned char *)src4;
+    unsigned char *ieee = (unsigned char *)dest4;
+    unsigned char sign = 0x00;
+    unsigned char ieee_exp = 0x00;
+    int i;
 
-	/* MS Binary Format                         */
-	/* byte order =>    m3 | m2 | m1 | exponent */
-	/* m1 is most significant byte => sbbb|bbbb */
-	/* m3 is the least significant byte         */
-	/*      m = mantissa byte                   */
-	/*      s = sign bit                        */
-	/*      b = bit                             */
+    /* MS Binary Format                         */
+    /* byte order =>    m3 | m2 | m1 | exponent */
+    /* m1 is most significant byte => sbbb|bbbb */
+    /* m3 is the least significant byte         */
+    /*      m = mantissa byte                   */
+    /*      s = sign bit                        */
+    /*      b = bit                             */
 
-	sign = msbin[2] & 0x80;      /* 1000|0000b  */
+    sign = msbin[2] & 0x80;      /* 1000|0000b  */
 
-	/* IEEE Single Precision Float Format       */
-	/*    m3        m2        m1     exponent   */
-	/* mmmm|mmmm mmmm|mmmm emmm|mmmm seee|eeee  */
-	/*          s = sign bit                    */
-	/*          e = exponent bit                */
-	/*          m = mantissa bit                */
+    /* IEEE Single Precision Float Format       */
+    /*    m3        m2        m1     exponent   */
+    /* mmmm|mmmm mmmm|mmmm emmm|mmmm seee|eeee  */
+    /*          s = sign bit                    */
+    /*          e = exponent bit                */
+    /*          m = mantissa bit                */
 
-	for (i = 0; i<4; i++) ieee[i] = 0;
+    for (i = 0; i<4; i++) ieee[i] = 0;
 
-	/* any msbin w/ exponent of zero = zero */
-	if (msbin[3] == 0) return 0;
+    /* any msbin w/ exponent of zero = zero */
+    if (msbin[3] == 0) return 0;
 
-	ieee[3] |= sign;
+    ieee[3] |= sign;
 
-	/* MBF is bias 128 and IEEE is bias 127. ALSO, MBF places   */
-	/* the decimal point before the assumed bit, while          */
-	/* IEEE places the decimal point after the assumed bit.     */
+    /* MBF is bias 128 and IEEE is bias 127. ALSO, MBF places   */
+    /* the decimal point before the assumed bit, while          */
+    /* IEEE places the decimal point after the assumed bit.     */
 
-	ieee_exp = msbin[3] - 2;    /* actually, msbin[3]-1-128+127 */
+    ieee_exp = msbin[3] - 2;    /* actually, msbin[3]-1-128+127 */
 
-	/* the first 7 bits of the exponent in ieee[3] */
-	ieee[3] |= ieee_exp >> 1;
+    /* the first 7 bits of the exponent in ieee[3] */
+    ieee[3] |= ieee_exp >> 1;
 
-	/* the one remaining bit in first bin of ieee[2] */
-	ieee[2] |= ieee_exp << 7;
+    /* the one remaining bit in first bin of ieee[2] */
+    ieee[2] |= ieee_exp << 7;
 
-	/* 0111|1111b : mask out the msbin sign bit */
-	ieee[2] |= msbin[2] & 0x7f;
+    /* 0111|1111b : mask out the msbin sign bit */
+    ieee[2] |= msbin[2] & 0x7f;
 
-	ieee[1] = msbin[1];
-	ieee[0] = msbin[0];
-	return 0;
+    ieee[1] = msbin[1];
+    ieee[0] = msbin[0];
+    return 0;
 }
 
