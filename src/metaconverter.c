@@ -6,9 +6,16 @@
 #include <string.h>        /* for strncpy  */
 #include <ctype.h>
 
+/*
 #define METADIR ""
 #define METAXMLDIR "xmls"
 #define METACSVDIR "csvs"
+*/
+
+char METADIR[256];
+char METAXMLDIR[256];
+char METACSVDIR[256];
+
 #define CONVERT_START_DATE 105
 
 #define VERSION_NUMBER  0x3636
@@ -109,7 +116,25 @@ int process_fdata(const char* symbol, FILE* fdatafile);
 
 int main(int argc, char *argv[])
 //int _tmain(int argc, _TCHAR* argv[])
-{
+{    
+    if(argc < 4)
+    {
+        printf("**********Usage***********\n");
+        printf("Enter 3 arguments\n");
+        printf("1: Metastock Folder\n");
+        printf("2: Output Xml folder\n");
+        printf("3: Output Csv folder\n");
+        exit(-1);
+    }
+    
+    strcpy(METADIR,argv[1]);
+    strcpy(METAXMLDIR,argv[2]);
+    strcpy(METACSVDIR,argv[3]);
+    
+    printf("%s\n",METADIR);
+    printf("%s\n",METAXMLDIR);
+    printf("%s\n",METACSVDIR);
+    
     process_master();
 
     //process_emaster();
@@ -127,7 +152,7 @@ int process_emaster( void )
 
     char outstr[100];
 
-    sprintf(outstr, "%sEMASTER", METADIR);
+    sprintf(outstr, "%s/EMASTER", METADIR);
 
     FILE* emasterfile = fopen(outstr, "rb");
 
@@ -163,7 +188,7 @@ int process_emaster( void )
                     &buffer[EMASTER_SYMBOL],
                     &buffer[EMASTER_NAME],
                     out2, out3);
-                sprintf(datfilename, "%sF%d.DAT", METADIR, buffer[EMASTER_FX]);
+                sprintf(datfilename, "%s/F%d.DAT", METADIR, buffer[EMASTER_FX]);
                 sprintf(symbol, "%s", &buffer[EMASTER_SYMBOL]);
                 datfile = fopen(datfilename, "rb");
                 if (datfile)
@@ -190,7 +215,7 @@ int process_master( void )
 
     char outstr[100];
 
-    sprintf(outstr, "%sMASTER", METADIR);
+    sprintf(outstr, "%s/MASTER", METADIR);
 
     FILE* masterfile = fopen(outstr, "rb");
 
@@ -214,7 +239,7 @@ int process_master( void )
                     &buffer[MASTER_SYMBOL],
                     &buffer[MASTER_NAME]);
 
-                sprintf(datfilename, "%sF%d.DAT", METADIR, buffer[MASTER_FX]);
+                sprintf(datfilename, "%s/F%d.DAT", METADIR, buffer[MASTER_FX]);
                 sprintf(symbol, "%s", &buffer[MASTER_SYMBOL]);
                 if (symbol[4] == 0x20)
                 {
@@ -249,7 +274,7 @@ int process_xmaster( void )
 
     char outstr[100];
 
-    sprintf(outstr, "%sXMASTER", METADIR);
+    sprintf(outstr, "%s/XMASTER", METADIR);
 
     FILE* xmasterfile = fopen(outstr, "rb");
 
@@ -287,7 +312,7 @@ int process_xmaster( void )
                 &buffer[XMASTER_NAME],
                 out3, out4);
 
-            sprintf(datfilename, "%sF%d.MWD", METADIR, (buffer[XMASTER_FN + 1] << 8) + buffer[XMASTER_FN]);
+            sprintf(datfilename, "%s/F%d.MWD", METADIR, (buffer[XMASTER_FN + 1] << 8) + buffer[XMASTER_FN]);
             sprintf(symbol, "%s", &buffer[XMASTER_SYMBOL]);
             datfile = fopen(datfilename, "rb");
 
